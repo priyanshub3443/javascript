@@ -1,5 +1,5 @@
 const BASE_URL =
-    "https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies";
+    "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies";
 
 const dropdowns = document.querySelectorAll(".dropdown select");
 const btn = document.querySelector("form button");
@@ -7,6 +7,7 @@ const fromCurr = document.querySelector(".from select");
 const toCurr = document.querySelector(".to select");
 const msg = document.querySelector(".msg");
 
+// Populate dropdowns
 for (let select of dropdowns) {
     for (currCode in countryList) {
         let newOption = document.createElement("option");
@@ -32,13 +33,26 @@ const updateExchangeRate = async () => {
         amtVal = 1;
         amount.value = "1";
     }
-    const URL = `${BASE_URL}/${fromCurr.value.toLowerCase()}/${toCurr.value.toLowerCase()}.json`;
-    let response = await fetch(URL);
-    let data = await response.json();
-    let rate = data[toCurr.value.toLowerCase()];
 
-    let finalAmount = amtVal * rate;
-    msg.innerText = `${amtVal} ${fromCurr.value} = ${finalAmount} ${toCurr.value}`;
+    const URL = `${BASE_URL}/${fromCurr.value.toLowerCase()}.json`; // Fetch base currency file
+    try {
+        let response = await fetch(URL);
+        if (!response.ok) throw new Error("Failed to fetch exchange rate");
+        let data = await response.json();
+
+        console.log("API Response:", data); // Log the full response
+        console.log("Looking for rate:", toCurr.value.toLowerCase()); // Log the target key
+
+        // Get rate for target currency
+        let rate = data[toCurr.value.toLowerCase()];
+        if (!rate) throw new Error(`Rate for ${toCurr.value} not found`);
+
+        let finalAmount = (amtVal * rate).toFixed(2);
+        msg.innerText = `${amtVal} ${fromCurr.value} = ${finalAmount} ${toCurr.value}`;
+    } catch (error) {
+        msg.innerText = "Error fetching exchange rate. Please try again.";
+        console.error(error);
+    }
 };
 
 const updateFlag = (element) => {
