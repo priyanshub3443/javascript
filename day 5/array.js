@@ -5,3 +5,4 @@ let city =["delhi", "meerut", "noida"]
 for(let el of city){
     console.log(el)
 }
+
